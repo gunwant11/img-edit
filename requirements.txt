@@ -1,0 +1,11 @@
+torch>=2.0.0
+transformers>=4.30.0
+diffusers @ git+https://github.com/huggingface/diffusers.git
+peft>=0.4.0
+huggingface-hub>=0.16.0
+Pillow>=9.0.0
+safetensors>=0.3.0
+streamlit==1.32.0
+accelerate>=0.20.0
+# flash-attn 
+openai
