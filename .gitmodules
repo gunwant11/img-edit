@@ -1,3 +1,3 @@
 [submodule "HiDream-E1"]
 	path = HiDream-E1
-	url = git@github.com:HiDream-ai/HiDream-E1.git
+	url = https://github.com/HiDream-ai/HiDream-E1.git
