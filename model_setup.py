@@ -1,5 +1,8 @@
 import torch
 from transformers import PreTrainedTokenizerFast, LlamaForCausalLM
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent / "HiDream-E1"))
 from pipeline_hidream_image_editing import HiDreamImageEditingPipeline
 from peft import LoraConfig
 from huggingface_hub import hf_hub_download
@@ -10,7 +13,7 @@ def setup_models():
     """
     Set up and initialize all required models for HiDream-E1.
     Returns:
-        tuple: (pipe, transformer, reload_keys)
+        tuple: (edit_pipe, gen_pipe, transformer, reload_keys)
     """
     # Set to True to enable instruction refinement and transformer model
     ENABLE_REFINE = True
@@ -49,9 +52,9 @@ def setup_models():
         info = transformer.load_state_dict(lora_ckpt, strict=False)
         assert len(info.unexpected_keys) == 0
 
-    # Initialize pipeline
+    # Initialize editing pipeline
     if ENABLE_REFINE:
-        pipe = HiDreamImageEditingPipeline.from_pretrained(
+        edit_pipe = HiDreamImageEditingPipeline.from_pretrained(
             "HiDream-ai/HiDream-I1-Full",
             tokenizer_4=tokenizer_4,
             text_encoder_4=text_encoder_4,
@@ -59,14 +62,23 @@ def setup_models():
             transformer=transformer,
         )
     else:
-        pipe = HiDreamImageEditingPipeline.from_pretrained(
+        edit_pipe = HiDreamImageEditingPipeline.from_pretrained(
             "HiDream-ai/HiDream-E1-Full",
             tokenizer_4=tokenizer_4,
             text_encoder_4=text_encoder_4,
             torch_dtype=torch.bfloat16,
         )
 
-    # Move pipeline to GPU
-    pipe = pipe.to("cuda", torch.bfloat16)
+    # Initialize generation pipeline
+    gen_pipe = HiDreamImageEditingPipeline.from_pretrained(
+        "HiDream-ai/HiDream-I1-Dev",
+        tokenizer_4=tokenizer_4,
+        text_encoder_4=text_encoder_4,
+        torch_dtype=torch.bfloat16,
+    )
+
+    # Move pipelines to GPU
+    edit_pipe = edit_pipe.to("cuda", torch.bfloat16)
+    gen_pipe = gen_pipe.to("cuda", torch.bfloat16)
     
-    return pipe, transformer, reload_keys 
+    return edit_pipe, gen_pipe, transformer, reload_keys 

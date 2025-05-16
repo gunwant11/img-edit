@@ -26,6 +26,9 @@ var/
 .installed.cfg
 *.egg
 
+__pycache__/
+HiDream-E1/__pycache__/
+
 # Virtual Environment
 venv/
 ENV/
